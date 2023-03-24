@@ -105,8 +105,10 @@ export default function Sidebar() {
           </IconButton>
          <Box sx={{width:'100%',display:'flex',justifyContent:'space-between'}}>
          <Typography variant="h6" noWrap component="div">
-            BLOG's WORLD
+            BLOG's WORLD {`#${users.session.firstName}_${users.session.lastName}`}
           </Typography>
+          <Box>
+          </Box>
           <Button sx={{float:'right',color:'white'}} onClick={()=>dispatch(logOut())}>
 LOG OUT
           </Button>
