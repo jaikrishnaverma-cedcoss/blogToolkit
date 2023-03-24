@@ -13,39 +13,47 @@ import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginApi } from '../features/UserSlice';
+import { cleanNotify, loginApi } from '../features/UserSlice';
+import AlreadyLogged from '../customHook/AlreadyLogged';
+import { useSnackbar } from 'notistack';
 
 function Copyright(props) {
   return (
-    <Typography variant="body2" color="text.secondary" align="center" {...props}>
-      {'Copyright © '}
-      <Link color="inherit" href="https://mui.com/">
-        Your Website
-      </Link>{' '}
-      {new Date().getFullYear()}
-      {'.'}
+    <Box sx={{mt:3}}>
+    <Typography variant="p"  color="text.secondary" align="center" {...props}>
+        { "username: atuny0 & password: 9uQFF1Lh"}
     </Typography>
+    </Box>
   );
 }
 
 const theme = createTheme();
 
 export default function Login() {
-  const selector = useSelector(state=>state)
+  AlreadyLogged()
+  const users=useSelector(state=>state.users)
+  React.useEffect(()=>{
+    if(users.error&&users.error.message&&users.error.status)
+    enqueueSnackbar(users.error.message, { variant: users.error.status });
+   return ()=>{
+    dispatch(cleanNotify())
+   }
+  },[users])
+  const { enqueueSnackbar } = useSnackbar();
   const dispatch =useDispatch()
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    dispatch(loginApi({
-      username: data.get('email'),
-      password: data.get('password'),
-    }))
-    console.log({
-      username: data.get('email'),
-      password: data.get('password'),
-    });
+    const username= data.get('email')
+    const password= data.get('password')
+    if(username && password)
+    dispatch(loginApi({username, password}))
+    else{
+      enqueueSnackbar("Please Fill all Fields.", { variant: "warning" });
+    }
+
   };
-console.log(selector)
+  
   return (
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
@@ -72,6 +80,7 @@ console.log(selector)
               id="email"
               label="Email Address"
               name="email"
+              defaultValue="atuny0"
               autoComplete="email"
               autoFocus
             />
@@ -83,6 +92,7 @@ console.log(selector)
               label="Password"
               type="password"
               id="password"
+              defaultValue="9uQFF1Lh"
               autoComplete="current-password"
             />
             <FormControlLabel
@@ -104,8 +114,8 @@ console.log(selector)
                 </Link>
               </Grid>
               <Grid item>
-                <Link href="#" variant="body2">
-                  {"Don't have an account? Sign Up"}
+                <Link href="https://dummyjson.com/users" target="_blank" variant="body2">
+                  {"Click for more users credentials"}
                 </Link>
               </Grid>
             </Grid>

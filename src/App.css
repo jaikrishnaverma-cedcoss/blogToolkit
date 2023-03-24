@@ -1,3 +1,6 @@
 .blog:hover{
    transform: scale(1.1);
 }
+.sidelink--active{
+   background-color: rgba(251, 255, 0, 0.616);
+}

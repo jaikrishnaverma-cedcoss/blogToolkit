@@ -18,10 +18,13 @@ import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import InboxIcon from '@mui/icons-material/MoveToInbox';
 import MailIcon from '@mui/icons-material/Mail';
-import { Outlet } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { fetchAllUsers } from '../features/UserSlice';
-import { fetchAllPosts } from '../features/BlogSlice';
+import { Outlet, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import BallotIcon from '@mui/icons-material/Ballot';
+import { Button, Container } from '@mui/material';
+import Authenticate from '../customHook/Authenticate';
+import { logOut } from '../features/UserSlice';
 
 const drawerWidth = 240;
 
@@ -73,8 +76,11 @@ const DrawerHeader = styled('div')(({ theme }) => ({
 export default function Sidebar() {
   const theme = useTheme();
   const dispatch=useDispatch()
+  Authenticate()
   const [open, setOpen] = React.useState(false);
-
+  const navigate=useNavigate()
+  const [active,setActive]=React.useState(null)
+ const users=useSelector(state=>state.users)
   const handleDrawerOpen = () => {
     setOpen(true);
   };
@@ -82,10 +88,7 @@ export default function Sidebar() {
   const handleDrawerClose = () => {
     setOpen(false);
   };
-React.useEffect(()=>{
-dispatch(fetchAllUsers())
-dispatch(fetchAllPosts())
-},[])
+
   return (
     <Box sx={{ display: 'flex' }}>
       <CssBaseline />
@@ -100,9 +103,14 @@ dispatch(fetchAllPosts())
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div">
-            Persistent drawer
+         <Box sx={{width:'100%',display:'flex',justifyContent:'space-between'}}>
+         <Typography variant="h6" noWrap component="div">
+            BLOG's WORLD
           </Typography>
+          <Button sx={{float:'right',color:'white'}} onClick={()=>dispatch(logOut())}>
+LOG OUT
+          </Button>
+         </Box>
         </Toolbar>
       </AppBar>
       <Drawer
@@ -124,14 +132,26 @@ dispatch(fetchAllPosts())
           </IconButton>
         </DrawerHeader>
         <Divider />
-        <List>
-          {['Inbox', 'Starred', 'Send email', 'Drafts'].map((text, index) => (
-            <ListItem key={text} disablePadding>
+        <ListItem className={`${active==null?'sidelink--active':''}`} key={'text'} disablePadding onClick={()=>{setActive(null);navigate(`/`)}}>
               <ListItemButton>
                 <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
+                <BallotIcon /> 
                 </ListItemIcon>
-                <ListItemText primary={text} />
+                <ListItemText primary={'All Posts'} />
+              </ListItemButton>
+            </ListItem>
+        <Divider />
+        <Typography variant="h6" sx={{mx:2,mt:2}}>
+           All Users
+          </Typography>
+        <List>
+          {users.users.map((text, index) => (
+            <ListItem className={`${active===index?'sidelink--active':''}`} key={text} disablePadding onClick={()=>{setActive(index);navigate(`/user/${index}`)}}>
+              <ListItemButton>
+                <ListItemIcon>
+                <AccountCircleIcon /> 
+                </ListItemIcon>
+                <ListItemText primary={text.firstName+" "+text.lastName} />
               </ListItemButton>
             </ListItem>
           ))}
@@ -152,6 +172,13 @@ dispatch(fetchAllPosts())
       </Drawer>
       <Main open={open}>
         <DrawerHeader />
+        <Container>
+
+        <Typography variant="h5" >
+        {active||active===0?users.users[active].firstName+" "+users.users[active].lastName+'\'s':'All Users'}
+          </Typography>
+        </Container>
+        
       <Outlet/>
       </Main>
     </Box>

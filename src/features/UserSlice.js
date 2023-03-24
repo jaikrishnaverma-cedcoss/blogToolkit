@@ -11,7 +11,18 @@ const UserSlice=createSlice({
     name:'UserSlice',
     initialState,
     reducers:{
-
+        setAllUsers: (state, action) => {
+            state.session=action.payload.session
+            state.loading=action.payload.loading
+            state.users=action.payload.users
+            state.error=action.payload.error
+          },
+          logOut:(state,action)=>{
+            state.session={}
+          },
+          cleanNotify:(state,action)=>{
+            state.error=false
+          }
     },
     extraReducers:(builder)=>{
         builder.addCase(loginApi.pending,(state,action)=>{
@@ -21,8 +32,9 @@ const UserSlice=createSlice({
               state.loading=false
               if(action.payload.message)
               state.error={status:'error',message:action.payload.message}
-              else
+              else{
               state.session=action.payload
+            state.error={status:'success',message:'Login Successfully.'}}
         })
         builder.addCase(loginApi.rejected,(state,action)=>{
             state.loading=false
@@ -35,8 +47,9 @@ const UserSlice=createSlice({
             state.loading=false
             if(action.payload.message)
             state.error={status:'error',message:action.payload.message}
-            else
+            else{
             state.users=action.payload.users
+        }
         })
         builder.addCase(fetchAllUsers.rejected,(state,action)=>{
             state.loading=false
@@ -45,6 +58,7 @@ const UserSlice=createSlice({
     }
 })
 export default UserSlice.reducer;
+export const {cleanNotify,setAllUsers,logOut}=UserSlice.actions
 export const loginApi=createAsyncThunk('UserSlice/loginApi',async (details)=>{
     const {username,password}=details
     console.log(username,password)
